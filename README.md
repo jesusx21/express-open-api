@@ -5,13 +5,13 @@ Another OpenAPI Validator for express.
 You can install this with `npm`:
 
 ```sh
-npm install --save express-open-api
+npm install --save @abiee/express-open-api
 ```
 
 Or with `yarn`:
 
 ```sh
-yarn add express-open-api
+yarn add @abiee/express-open-api
 ```
 
 ## Usage
