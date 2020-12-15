@@ -19,7 +19,7 @@ You need to have an OpenAPI Spec file somewhere
 
 ```javascript
 const express = require('express');
-const expressOpenAPI = require('express-open-api');
+const expressOpenAPI = require('@abiee/express-open-api');
 
 const app = express();
 const middleware = expressOpenAPI('/path/to/your/spec.yml');
@@ -145,7 +145,7 @@ const {
   ValidationError,
   RouteNotDefinedOnOpenAPISpec,
   InvalidAPISpecFormat
-} = require('express-open-api/errors');
+} = require('@abiee/express-open-api/errors');
 ```
 
 #### ValidationError
