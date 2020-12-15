@@ -1,0 +1,56 @@
+openapi: 3.0.3
+
+info:
+  title: Echo API
+  description: Simple Rest Echo
+  version: 1.0.0
+
+paths:
+  /echo:
+    get:
+      description: Returns the 'message' to the caller
+      parameters:
+        - name: message
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EchoResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      description: Returns the 'message' to the caller
+      requestBody:
+        description: The message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EchoRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EchoResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    $ref: ./this-does-not-exists.yml

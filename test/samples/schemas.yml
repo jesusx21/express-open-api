@@ -1,0 +1,30 @@
+ServerVersion:
+  required:
+    - version
+  properties:
+    version:
+      type: string
+
+EchoRequest:
+  required:
+    - message
+  properties:
+    message:
+      type: string
+
+EchoResponse:
+  required:
+    - message
+  properties:
+    message:
+      type: string
+
+Error:
+  properties:
+    code:
+      type: integer
+      format: int32
+    message:
+      type: string
+    fields:
+      type: string

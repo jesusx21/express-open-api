@@ -1,0 +1,30 @@
+{
+  "name": "express-open-api",
+  "version": "0.0.1",
+  "description": "OpenAPI Validator",
+  "main": "index.js",
+  "author": "Abiee Echamea",
+  "license": "MIT",
+  "repository": "abiee/express-open-api",
+  "scripts": {
+    "test": "mocha",
+    "lint": "eslint index.js errors.js test/"
+  },
+  "dependencies": {
+    "api-schema-builder": "^2.0.4",
+    "auto-bind": "^4.0.0",
+    "express-mung": "^0.5.1",
+    "lodash.isempty": "^4.4.0",
+    "swagger-parser": "^10.0.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "express": "^4.17.1",
+    "mocha": "^8.2.1",
+    "sinon": "^9.2.1",
+    "supertest": "^6.0.1"
+  }
+}
