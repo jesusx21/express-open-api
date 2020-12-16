@@ -78,7 +78,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EchoResponse'
-        default:
+        400:
           description: Error
           content:
             application/json:

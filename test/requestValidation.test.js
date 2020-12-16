@@ -4,7 +4,7 @@ const request = require('supertest');
 const path = require('path');
 const sinon = require('sinon');
 
-const createEchoServer = require('./echoServer');
+const createEchoServer = require('./servers/simple');
 const expressOpenAPI = require('../index');
 
 const { expect } = chai;
@@ -14,7 +14,9 @@ describe('Request Validations', () => {
 
   describe('GET', () => {
     it('should be ok on valid requests with query', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -24,7 +26,9 @@ describe('Request Validations', () => {
     });
 
     it('should be ok on valid requests with params', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -33,28 +37,65 @@ describe('Request Validations', () => {
     });
 
     it('should return 400 if required query parameter is missing', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false
+      });
       const app = createEchoServer(middleware);
 
       request(app)
         .get('/api/echo')
-        .expect(400, done);
+        .expect(400)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body).to.be.deep.equal({
+            code: 'BAD_REQUEST',
+            errors: [{
+              keyword: 'required',
+              dataPath: '.query',
+              schemaPath: '#/properties/query/required',
+              message: "should have required property 'message'",
+              params: {
+                missingProperty: 'message'
+              }
+            }]
+          });
+
+          done();
+        });
     });
 
     it('should return 400 if unexpected body is sent', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false
+      });
       const app = createEchoServer(middleware);
 
       request(app)
         .get('/api/echo')
         .query({ message: 'hello world' })
         .send({ colors: true })
-        .expect(400, done);
+        .expect(400)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body).to.be.deep.equal({
+            code: 'BAD_REQUEST',
+            errors: [{
+              message: 'unexpected payload received',
+            }]
+          });
+
+          done();
+        });
     });
 
     it('should call request validator handler if required query parameter is missing', (done) => {
       const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { invalidRequestHandler: spy });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        invalidRequestHandler: spy
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -77,7 +118,10 @@ describe('Request Validations', () => {
 
     it('should call request validator handler if unexpected body is sent', (done) => {
       const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { invalidRequestHandler: spy });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        invalidRequestHandler: spy
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -102,19 +146,33 @@ describe('Request Validations', () => {
 
     it('should return 500 on request validator handler and unexpected error', (done) => {
       const spy = sinon.stub().throws();
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { invalidRequestHandler: spy });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        invalidRequestHandler: spy
+      });
       const app = createEchoServer(middleware);
 
       request(app)
         .get('/api/echo')
         .query({ message: 'hello world' })
         .send({ colors: true })
-        .expect(500, done);
+        .expect(500)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body.code).to.equal('INTERNAL_SERVER_ERROR');
+          expect(res.body.error).to.not.be.undefined;
+
+          done();
+        });
     });
 
     it('should call on request error handler if required query parameter is missing', (done) => {
-      const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { onRequestValidationError: spy });
+      const stub = sinon.stub();
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        onRequestValidationError: stub
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -123,9 +181,9 @@ describe('Request Validations', () => {
         .end((error) => {
           if (error) return done(error);
 
-          expect(spy.calledOnce).to.be.true;
+          expect(stub.calledOnce).to.be.true;
 
-          const call = spy.getCalls()[0];
+          const call = stub.getCalls()[0];
 
           expect(call.args[0].constructor.name).to.be.equal('ValidationError');
           expect(call.args[1]).to.be.equal('GET');
@@ -136,8 +194,11 @@ describe('Request Validations', () => {
     });
 
     it('should call on request error handler if unexpected body is sent', (done) => {
-      const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { onRequestValidationError: spy });
+      const stub = sinon.stub();
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        onRequestValidationError: stub
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -148,9 +209,9 @@ describe('Request Validations', () => {
         .end((error) => {
           if (error) return done(error);
 
-          expect(spy.calledOnce).to.be.true;
+          expect(stub.calledOnce).to.be.true;
 
-          const call = spy.getCalls()[0];
+          const call = stub.getCalls()[0];
 
           expect(call.args[0].constructor.name).to.be.equal('ValidationError');
           expect(call.args[1]).to.be.equal('GET');
@@ -161,8 +222,11 @@ describe('Request Validations', () => {
     });
 
     it('should do nothing when call on request error handler and unexpected error', (done) => {
-      const spy = sinon.stub().throws();
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { onRequestValidationError: spy });
+      const stub = sinon.stub().throws();
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        onRequestValidationError: stub
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -175,7 +239,9 @@ describe('Request Validations', () => {
 
   describe('POST', () => {
     it('should be ok on valid requests', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -185,28 +251,65 @@ describe('Request Validations', () => {
     });
 
     it('should return 400 if required body is missing', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+      });
       const app = createEchoServer(middleware);
 
       request(app)
         .post('/api/echo')
-        .expect(400, done);
+        .expect(400)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body).to.be.deep.equal({
+            code: 'BAD_REQUEST',
+            errors: [{
+              keyword: 'required',
+              dataPath: '',
+              schemaPath: '#/required',
+              message: "should have required property 'message'",
+              params: {
+                missingProperty: 'message'
+              }
+            }]
+          });
+
+          done();
+        });
     });
 
     it('should return 400 if unexpected query parameters are sent', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH);
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+      });
       const app = createEchoServer(middleware);
 
       request(app)
         .post('/api/echo')
         .send({ message: 'hello world' })
         .query({ colors: true })
-        .expect(400, done);
+        .expect(400)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body).to.be.deep.equal({
+            code: 'BAD_REQUEST',
+            errors: [{
+              message: 'unexpected query parameters received'
+            }]
+          });
+
+          done();
+        });
     });
 
     it('should call request validator handler if required body is missing', (done) => {
       const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { invalidRequestHandler: spy });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        invalidRequestHandler: spy
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -229,7 +332,10 @@ describe('Request Validations', () => {
 
     it('should call request validator handler if unexpected query parameters are sent', (done) => {
       const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { invalidRequestHandler: spy });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        invalidRequestHandler: spy
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -254,19 +360,33 @@ describe('Request Validations', () => {
 
     it('should return 500 on request validator handler and unexpected error', (done) => {
       const spy = sinon.stub().throws();
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { invalidRequestHandler: spy });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        invalidRequestHandler: spy
+      });
       const app = createEchoServer(middleware);
 
       request(app)
         .post('/api/echo')
         .send({ message: 'hello world' })
         .query({ colors: true })
-        .expect(500, done);
+        .expect(500)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body.code).to.equal('INTERNAL_SERVER_ERROR');
+          expect(res.body.error).to.not.be.undefined;
+
+          done();
+        });
     });
 
     it('should call on request error handler if required body is missing', (done) => {
-      const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { onRequestValidationError: spy });
+      const stub = sinon.stub();
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        onRequestValidationError: stub
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -275,9 +395,9 @@ describe('Request Validations', () => {
         .end((error) => {
           if (error) return done(error);
 
-          expect(spy.calledOnce).to.be.true;
+          expect(stub.calledOnce).to.be.true;
 
-          const call = spy.getCalls()[0];
+          const call = stub.getCalls()[0];
 
           expect(call.args[0].constructor.name).to.be.equal('ValidationError');
           expect(call.args[1]).to.be.equal('POST');
@@ -288,8 +408,11 @@ describe('Request Validations', () => {
     });
 
     it('should call on request error handler if unexpected query parameters are sent', (done) => {
-      const spy = sinon.spy((error, req, res, next) => next());
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { onRequestValidationError: spy });
+      const stub = sinon.stub();
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        onRequestValidationError: stub
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -300,9 +423,9 @@ describe('Request Validations', () => {
         .end((error) => {
           if (error) return done(error);
 
-          expect(spy.calledOnce).to.be.true;
+          expect(stub.calledOnce).to.be.true;
 
-          const call = spy.getCalls()[0];
+          const call = stub.getCalls()[0];
 
           expect(call.args[0].constructor.name).to.be.equal('ValidationError');
           expect(call.args[1]).to.be.equal('POST');
@@ -315,7 +438,10 @@ describe('Request Validations', () => {
 
   describe('Undefined OpenAPI Spec for Route', () => {
     it('should be ok if allowed not defined paths', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { allowNotDefinedPaths: true });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        allowNotDefinedPaths: true
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -324,7 +450,10 @@ describe('Request Validations', () => {
     });
 
     it('should return 400 if not allowed undefined paths', (done) => {
-      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, { allowNotDefinedPaths: false });
+      const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
+        allowNotDefinedPaths: false
+      });
       const app = createEchoServer(middleware);
 
       request(app)
@@ -335,6 +464,7 @@ describe('Request Validations', () => {
     it('should call request validator handler if not allowed undefined paths', (done) => {
       const spy = sinon.spy((error, req, res, next) => next());
       const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
         allowNotDefinedPaths: false,
         invalidRequestHandler: spy
       });
@@ -353,10 +483,11 @@ describe('Request Validations', () => {
     });
 
     it('should call on missing path handler if allowed undefined paths', (done) => {
-      const spy = sinon.stub();
+      const stub = sinon.stub();
       const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
         allowNotDefinedPaths: true,
-        onMissingPath: spy
+        onMissingPath: stub
       });
       const app = createEchoServer(middleware);
 
@@ -366,22 +497,24 @@ describe('Request Validations', () => {
         .end((error) => {
           if (error) return done(error);
 
-          expect(spy.calledOnce).to.be.true;
+          expect(stub.calledOnce).to.be.true;
 
-          const call = spy.getCalls()[0];
+          const call = stub.getCalls()[0];
 
           expect(call.args[0]).to.be.equal('GET');
           expect(call.args[1]).to.be.equal('/api/foo');
+          expect(call.args[2].constructor.name).to.be.equal('RouteNotDefinedInOpenAPISpec');
 
           done();
         });
     });
 
     it('should call on missing path handler if not allowed undefined paths', (done) => {
-      const spy = sinon.stub();
+      const stub = sinon.stub();
       const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
         allowNotDefinedPaths: false,
-        onMissingPath: spy
+        onMissingPath: stub
       });
       const app = createEchoServer(middleware);
 
@@ -391,9 +524,9 @@ describe('Request Validations', () => {
         .end((error) => {
           if (error) return done(error);
 
-          expect(spy.calledOnce).to.be.true;
+          expect(stub.calledOnce).to.be.true;
 
-          const call = spy.getCalls()[0];
+          const call = stub.getCalls()[0];
 
           expect(call.args[0]).to.be.equal('GET');
           expect(call.args[1]).to.be.equal('/api/foo');
@@ -403,16 +536,25 @@ describe('Request Validations', () => {
     });
 
     it('should return 500 when call on missing path handler and unexpected error', (done) => {
-      const spy = sinon.stub().throws();
+      const stub = sinon.stub().throws();
       const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+        validateResponses: false,
         allowNotDefinedPaths: false,
-        onMissingPath: spy
+        onMissingPath: stub
       });
       const app = createEchoServer(middleware);
 
       request(app)
         .get('/api/foo')
-        .expect(500, done);
+        .expect(500)
+        .end((error, res) => {
+          if (error) return done(error);
+
+          expect(res.body.code).to.equal('INTERNAL_SERVER_ERROR');
+          expect(res.body.error).to.not.be.undefined;
+
+          done();
+        });
     });
   });
 });
