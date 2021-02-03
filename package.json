@@ -1,6 +1,6 @@
 {
   "name": "@abiee/express-open-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "OpenAPI Validator",
   "main": "index.js",
   "author": "Abiee Echamea",
@@ -14,7 +14,10 @@
     "api-schema-builder": "^2.0.4",
     "auto-bind": "^4.0.0",
     "express-mung": "^0.5.1",
+    "lodash.isdate": "^4.0.1",
     "lodash.isempty": "^4.4.0",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.mapvalues": "^4.6.0",
     "swagger-parser": "^10.0.2"
   },
   "devDependencies": {
@@ -28,6 +31,9 @@
     "supertest": "^6.0.1"
   },
   "keywords": [
-    "openapi", "middleware", "express", "swagger"
+    "openapi",
+    "middleware",
+    "express",
+    "swagger"
   ]
 }

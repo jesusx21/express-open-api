@@ -1,7 +1,7 @@
 /* eslint consistent-return: "off" */
 const chai = require('chai');
-const request = require('supertest');
 const path = require('path');
+const request = require('supertest');
 const sinon = require('sinon');
 
 const createGoodEchoServer = require('./servers/simple');
@@ -23,6 +23,29 @@ describe('Response Validations', () => {
       .get('/api/echo')
       .query({ message: 'hello world' })
       .expect(200, { message: 'hello world' }, done);
+  });
+
+  it('should be ok on valid responses with date-time', (done) => {
+    const middleware = expressOpenAPI(OPEN_API_SPEC_PATH, {
+      validateResponses: true
+    });
+    const app = createGoodEchoServer(middleware);
+
+    const clock = sinon.useFakeTimers(Date.UTC(2021, 0, 1));
+
+    request(app)
+      .get('/api/time')
+      .expect(200, {
+        time: '2021-01-01T00:00:00.000Z',
+        metadata: {
+          yesterday: '2020-12-31T00:00:00.000Z',
+          tomorrow: '2021-01-02T00:00:00.000Z'
+        }
+      }, (error) => {
+        clock.restore();
+
+        done(error);
+      });
   });
 
   it('should return 501 on different response body', (done) => {
@@ -187,6 +210,7 @@ describe('Response Validations', () => {
         expect(call.args[1]).to.be.equal('GET');
         expect(call.args[2]).to.be.equal('/api/echo');
         expect(call.args[3]).to.be.equal(200);
+        expect(call.args[4]).to.be.deep.equal({ result: 'hello world' });
 
         done();
       });

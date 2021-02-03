@@ -1,7 +1,7 @@
 /* eslint consistent-return: "off" */
 const chai = require('chai');
-const request = require('supertest');
 const path = require('path');
+const request = require('supertest');
 const sinon = require('sinon');
 
 const createEchoServer = require('./servers/simple');
@@ -188,6 +188,7 @@ describe('Request Validations', () => {
           expect(call.args[0].constructor.name).to.be.equal('ValidationError');
           expect(call.args[1]).to.be.equal('GET');
           expect(call.args[2]).to.be.equal('/api/echo');
+          expect(call.args[3]).to.be.deep.equal({ });
 
           done();
         });
@@ -216,6 +217,14 @@ describe('Request Validations', () => {
           expect(call.args[0].constructor.name).to.be.equal('ValidationError');
           expect(call.args[1]).to.be.equal('GET');
           expect(call.args[2]).to.be.equal('/api/echo');
+          expect(call.args[3]).to.be.deep.equal({
+            query: {
+              message: 'hello world'
+            },
+            body: {
+              colors: true
+            }
+          });
 
           done();
         });

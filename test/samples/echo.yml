@@ -85,6 +85,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /api/time:
+    get:
+      description: Returns the current date time in the server
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     ServerVersion:
@@ -107,6 +124,27 @@ components:
       properties:
         message:
           type: string
+
+    TimeResponse:
+      required:
+        - time
+        - metadata
+      properties:
+        time:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          required:
+            - yesterday
+            - tomorrow
+          properties:
+            yesterday:
+              type: string
+              format: date-time
+            tomorrow:
+              type: string
+              format: date-time
 
     Error:
       properties:

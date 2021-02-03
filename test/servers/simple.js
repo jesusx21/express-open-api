@@ -1,5 +1,13 @@
 const express = require('express');
 
+function dateWithDaysOffset(offset) {
+  const date = new Date();
+
+  date.setDate(date.getDate() + offset);
+
+  return date;
+}
+
 function createEchoServer(middleware) {
   const app = express();
 
@@ -15,6 +23,20 @@ function createEchoServer(middleware) {
 
   app.post('/api/echo', middleware, (req, res) => {
     res.send({ message: req.body.message });
+  });
+
+  app.get('/api/time', middleware, (req, res) => {
+    const now = new Date();
+    const yesterday = dateWithDaysOffset(-1);
+    const tomorrow = dateWithDaysOffset(1);
+
+    res.send({
+      time: now,
+      metadata: {
+        yesterday,
+        tomorrow
+      }
+    });
   });
 
   app.get('/api/echo/:username', middleware, (req, res) => {

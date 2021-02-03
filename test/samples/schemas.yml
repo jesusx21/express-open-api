@@ -19,6 +19,27 @@ EchoResponse:
     message:
       type: string
 
+TimeResponse:
+  required:
+    - time
+    - metadata
+  properties:
+    time:
+      type: string
+      format: date-time
+    metadata:
+      type: object
+      required:
+        - yesterday
+        - tomorrow
+      properties:
+        yesterday:
+          type: string
+          format: date-time
+        tomorrow:
+          type: string
+          format: date-time
+
 Error:
   properties:
     code:
