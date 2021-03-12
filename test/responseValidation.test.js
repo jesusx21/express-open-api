@@ -40,7 +40,12 @@ describe('Response Validations', () => {
         metadata: {
           yesterday: '2020-12-31T00:00:00.000Z',
           tomorrow: '2021-01-02T00:00:00.000Z'
-        }
+        },
+        dates: [
+          '2020-12-31T00:00:00.000Z',
+          '2021-01-01T00:00:00.000Z',
+          '2021-01-02T00:00:00.000Z'
+        ]
       }, (error) => {
         clock.restore();
 

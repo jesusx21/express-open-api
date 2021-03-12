@@ -35,7 +35,10 @@ function createEchoServer(middleware) {
       metadata: {
         yesterday,
         tomorrow
-      }
+      },
+      dates: [
+        yesterday, now, tomorrow
+      ]
     });
   });
 
