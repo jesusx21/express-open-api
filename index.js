@@ -27,6 +27,14 @@ function expressOpenAPI(specFilePath, options = DEFAULT_OPTIONS) {
   if (optionsToApply.validateResponses) {
     const responseValidator = new ResponseValidator(specLoader, optionsToApply);
 
+    // When an error is thrown express leaves req.baseUrl as an empty string, but we need it
+    // in order to find the right OpenAPI schema
+    middlewares.push((req, _res, next) => {
+      req.originalBaseUrl = req.baseUrl;
+
+      next();
+    });
+
     middlewares.push(mung.jsonAsync(responseValidator.middleware, { mungError: true }));
   }
 
