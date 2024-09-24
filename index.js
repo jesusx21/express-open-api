@@ -1,9 +1,12 @@
 const fs = require('fs');
 const mung = require('express-mung');
+const sourceMapSupport = require('source-map-support');
 
 const RequestValidator = require('./lib/requestValidator');
 const ResponseValidator = require('./lib/responseValidator');
 const SpecLoader = require('./lib/specLoader');
+
+sourceMapSupport.install();
 
 const DEFAULT_OPTIONS = {
   allowNotDefinedPaths: false,
