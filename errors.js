@@ -10,23 +10,6 @@ class ValidationError extends Error {
   }
 }
 
-class RouteNotDefinedInOpenAPISpec extends Error {
-  constructor(method, endpoint) {
-    super();
-
-    this.method = method;
-    this.endpoint = endpoint;
-  }
-
-  getMethod() {
-    return this.method;
-  }
-
-  getEndpoint() {
-    return this.endpoint;
-  }
-}
-
 class ResponseNotDefinedInOpenAPISpec extends Error {
   constructor(method, endpoint, statusCode) {
     super();
@@ -49,26 +32,7 @@ class ResponseNotDefinedInOpenAPISpec extends Error {
   }
 }
 
-class InvalidAPISpecFormat extends Error {
-  constructor(specFilePath, error) {
-    super();
-
-    this.specFilePath = specFilePath;
-    this.error = error;
-  }
-
-  getFilePath() {
-    return this.specFilePath;
-  }
-
-  getError() {
-    return this.error;
-  }
-}
-
 module.exports = {
   ValidationError,
-  RouteNotDefinedInOpenAPISpec,
   ResponseNotDefinedInOpenAPISpec,
-  InvalidAPISpecFormat
 };
