@@ -1,9 +1,9 @@
 // @ts-ignore
 import apiSchemaBuilder from 'api-schema-builder';
-import isEmpty from 'lodash.isempty';
 import SwaggerParser from 'swagger-parser';
+import { isEmpty } from 'lodash';
 
-import { APISpec, HTTPMethods, Json, SchemaSyncOptions } from './types';
+import { APISpec, HTTPMethods, Json, SchemaSyncOptions, Validator } from './types';
 import { InvalidAPISpecFormat, RouteNotDefinedInOpenAPISpec } from './errors';
 import { Schema } from './types';
 
@@ -18,7 +18,7 @@ export default class SpecLoader {
     this.enableTypeCoertion = true;
   }
 
-  async findValidatorForEndpoint(method: HTTPMethods, endpoint: string): Promise<Json> {
+  async findValidatorForEndpoint(method: HTTPMethods, endpoint: string): Promise<Validator> {
     const schema = await this.getValidationSchema();
 
     if (!this.hasValidatorForEndpoint(schema, method, endpoint)) {
@@ -28,7 +28,7 @@ export default class SpecLoader {
     return this.getEndpoint(schema, endpoint)[method];
   }
 
-  async getValidationSchema(): Promise<Json> {
+  async getValidationSchema(): Promise<Schema> {
     if (this.schema) return this.schema
 
     await this.loadAPISpec();
