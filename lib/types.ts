@@ -1,4 +1,4 @@
-import { Response as ExpressResponse, Request as ExpressRequest } from 'express';
+import { Response as ExpressResponse, Request as ExpressRequest, NextFunction } from 'express';
 import { OpenAPI } from 'openapi-types';
 
 export enum HTTPMethods {
@@ -58,14 +58,13 @@ export type RequestData = {
   query?: Json
 };
 
-export type Next = (error?: ErrorSchema) => void;
-export type Request = ExpressRequest & { method: HTTPMethods, originalBaseUrl: string };
-export type Middleware = (req: Request, res: Response, next: Next) => any;
+export type Request = ExpressRequest & { method?: HTTPMethods, originalBaseUrl?: string };
+export type Middleware = (req: Request, res: Response, next: NextFunction) => any;
 export type Response = ExpressResponse;
 
-export type ErrorHandler = (error: ErrorSchema, req: Request, res: Response, next: Next) => void;
+export type ErrorHandler = (error: ErrorSchema, req: Request, res: Response, next: NextFunction) => void;
 export type InvalidResponseHandler = (error: ErrorSchema, body: Json, req: Request, res: Response) => Error;
-export type InvalidRequestHandler = (error: ErrorSchema, req: Request, res: Response, next: Next) => Error;
+export type InvalidRequestHandler = (error: ErrorSchema, req: Request, res: Response, next: NextFunction) => void;
 export type OnError = (error: ErrorSchema, method: HTTPMethods, endpoint: string, data: number | RequestData) => void;
 export type OnMissingPath = (error: ErrorSchema, method: HTTPMethods, endpoint: string) => void;
 export type OnResponseValidationError = (error: ErrorSchema, method: HTTPMethods, endpoint: string, statusCode: number, body?: Json) => void;

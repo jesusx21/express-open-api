@@ -1,10 +1,17 @@
-const fs = require('fs');
-const mung = require('express-mung');
-const sourceMapSupport = require('source-map-support');
+import mung from 'express-mung';
+import sourceMapSupport from 'source-map-support';
+import * as fs from 'fs';
+import { NextFunction } from 'express';
 
-const RequestValidator = require('./lib/requestValidator');
-const ResponseValidator = require('./lib/responseValidator');
-const SpecLoader = require('./lib/specLoader');
+import RequestValidator from './lib/requestValidator';
+import ResponseValidator from './lib/responseValidator';
+import SpecLoader from './lib/specLoader';
+import {
+  Middleware,
+  Request,
+  Response,
+  ValidatorOptions
+} from './lib/types';
 
 sourceMapSupport.install();
 
@@ -14,13 +21,16 @@ const DEFAULT_OPTIONS = {
   validateResponses: true
 };
 
-function expressOpenAPI(specFilePath, options = DEFAULT_OPTIONS) {
+export default function expressOpenAPI(
+  specFilePath: string,
+  options: ValidatorOptions = DEFAULT_OPTIONS
+) {
   if (!fs.existsSync(specFilePath)) {
     throw new Error(`OpenAPI spec file does not exists: ${specFilePath}`);
   }
 
   const optionsToApply = { ...DEFAULT_OPTIONS, ...options };
-  const middlewares = [];
+  const middlewares: Middleware[] = [];
 
   const specLoader = new SpecLoader(specFilePath);
   const requestValidator = new RequestValidator(specLoader, optionsToApply);
@@ -32,7 +42,7 @@ function expressOpenAPI(specFilePath, options = DEFAULT_OPTIONS) {
 
     // When an error is thrown express leaves req.baseUrl as an empty string, but we need it
     // in order to find the right OpenAPI schema
-    middlewares.push((req, _res, next) => {
+    middlewares.push((req: Request, _res: Response, next: NextFunction) => {
       req.originalBaseUrl = req.baseUrl;
 
       next();
@@ -43,5 +53,3 @@ function expressOpenAPI(specFilePath, options = DEFAULT_OPTIONS) {
 
   return middlewares;
 }
-
-module.exports = expressOpenAPI;

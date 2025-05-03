@@ -1,5 +1,6 @@
 import autoBind from 'autobind-decorator';
 import { isEmpty } from 'lodash';
+import { NextFunction } from 'express';
 
 import SpecLoader from 'specLoader';
 import { ErrorCodes } from 'errors/codes';
@@ -12,7 +13,6 @@ import {
   ErrorSchema,
   InvalidRequestHandler,
   Json,
-  Next,
   OnError,
   OnMissingPath,
   Request,
@@ -38,7 +38,7 @@ export default class RequestValidator {
     this.onMissingPath = options.onMissingPath;
   }
 
-  async middleware(req: Request, res: Response, next: Next): Promise<void> {
+  async middleware(req: Request, res: Response, next: NextFunction): Promise<void> {
     const endpoint = this.resolveEndpoint(req);
 
     let validator: Validator;
@@ -92,7 +92,7 @@ export default class RequestValidator {
     return next();
   }
 
-  private handleError(error: ErrorSchema, req: Request, res: Response, next: Next): void {
+  private handleError(error: ErrorSchema, req: Request, res: Response, next: NextFunction): void {
     if (!this.errorHandler) {
       this.defaultErrorHandler(error, req, res);
     } else {
