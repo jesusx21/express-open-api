@@ -1,4 +1,4 @@
-import { ErrorSchema, HTTPMethods } from './types';
+import { ErrorSchema, HTTPMethods } from '../types';
 
 class ExpressOpenAPIError extends Error {
   private error: ErrorSchema;
