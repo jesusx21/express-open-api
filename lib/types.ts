@@ -24,11 +24,11 @@ export type ErrorSchema = {
 
 export type Validator = {
   body?: {
-    errors: ErrorSchema,
+    errors: ErrorSchema[],
     validate: (params: Json) => void
   },
   parameters?: {
-    errors: ErrorSchema,
+    errors: ErrorSchema[],
     validate: (params: Json) => void
   },
   errors?: ErrorSchema[] | string,
@@ -65,7 +65,7 @@ export type Response = ExpressResponse;
 
 export type ErrorHandler = (error: ErrorSchema, req: Request, res: Response, next: Next) => void;
 export type InvalidResponseHandler = (error: ErrorSchema, body: Json, req: Request, res: Response) => Error;
-export type InvalidRequestHandler = (error: ErrorSchema, req: Request, res: Response) => Error;
+export type InvalidRequestHandler = (error: ErrorSchema, req: Request, res: Response, next: Next) => Error;
 export type OnError = (error: ErrorSchema, method: HTTPMethods, endpoint: string, data: number | RequestData) => void;
 export type OnMissingPath = (error: ErrorSchema, method: HTTPMethods, endpoint: string) => void;
 export type OnResponseValidationError = (error: ErrorSchema, method: HTTPMethods, endpoint: string, statusCode: number, body?: Json) => void;
