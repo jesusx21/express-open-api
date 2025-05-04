@@ -1,4 +1,4 @@
-import { ErrorSchema } from 'types';
+import { ErrorSchema, HTTPMethods } from 'types';
 
 class ExpressOpenAPIError extends Error {
   private error?: ErrorSchema;
@@ -28,5 +28,22 @@ export class InvalidAPISpecFormat extends ExpressOpenAPIError {
 
   getFilePath() {
     return this.specFilePath;
+  }
+}
+
+export class RouteNotDefinedInOpenAPISpec extends ExpressOpenAPIError {
+  constructor(
+    private method: HTTPMethods,
+    private endpoint: string
+  ) {
+    super();
+  }
+
+  getMethod() {
+    return this.method;
+  }
+
+  getEndpoint() {
+    return this.endpoint;
   }
 }
