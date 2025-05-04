@@ -1,15 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "baseUrl": "./lib",
+    "lib": ["esnext"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "outDir": "dist",
+    "removeComments": false,
+    "strict": true,
+    "target": "ES2016",
     "paths": {
-      "*": ["node_modules/*", "lib/types/*"]
+      "*": ["lib/*"],
+      "tests": ["tests/"],
+      "tests/*": ["tests/*"]
     }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   },
   "include": ["lib/**/*.ts"],
   "exclude": ["node_modules", "dist"]
