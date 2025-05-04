@@ -1,0 +1,22 @@
+{
+  "name": "express-open-api",
+  "version": "1.0.0",
+  "description": "OpenAPI Validator",
+  "main": "dist/lib/index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": "git+https://github.com/jesusx21/express-open-api.git",
+  "keywords": [
+    "openapi",
+    "middleware",
+    "express",
+    "swagger"
+  ],
+  "author": "Abiee Echamea & Jesus Agustin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jesusx21/express-open-api/issues"
+  },
+  "homepage": "https://github.com/jesusx21/express-open-api#readme"
+}
