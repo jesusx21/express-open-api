@@ -1,10 +1,17 @@
 // @ts-ignore
 import apiSchemaBuilder from 'api-schema-builder';
 import SwaggerParser from 'swagger-parser';
+import { isNil } from 'lodash';
 
 import { InvalidAPISpecFormat, RouteNotDefinedInOpenAPISpec } from 'errors';
-import { Spec, Schema, AJVConfiguration, HTTPMethods, Validator, EndpointSchema } from 'types';
-import { isNil } from 'lodash';
+import {
+  AJVConfiguration,
+  EndpointSchema,
+  HTTPMethods,
+  Schema,
+  Spec,
+  Validator
+} from 'types';
 
 export default class SpecLoader {
   private enableTypeCoercion: boolean;
@@ -39,7 +46,7 @@ export default class SpecLoader {
         ajvConfigBody: this.getAJVConfiguration(),
         ajvConfigParams: this.getAJVConfiguration()
       }
-    )
+    );
 
     return this.schema;
   }
@@ -54,7 +61,7 @@ export default class SpecLoader {
     try {
       // @ts-ignore
       this.spec = await SwaggerParser.validate(this.specFilePath);
-    } catch (error: any) {
+    } catch (error) {
       throw new InvalidAPISpecFormat(this.specFilePath, error);
     }
 
@@ -84,8 +91,6 @@ export default class SpecLoader {
       return schema[endpointWithoutTrailingSlash] || schema[endpoint];
     }
 
-    const endpointWithTrailingSlash = endpoint + '/';
-
-    return schema[endpoint] || schema[endpointWithTrailingSlash];
+    return schema[endpoint] || schema[`${endpoint}/`];
   }
 }

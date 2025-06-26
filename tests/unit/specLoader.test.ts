@@ -3,7 +3,13 @@ import SwaggerParser from 'swagger-parser';
 
 import SpecLoader from 'specLoader';
 import { InvalidAPISpecFormat, RouteNotDefinedInOpenAPISpec } from 'errors';
-import { Schema, Spec, HTTPMethods, Validator, Json } from 'types';
+import {
+  HTTPMethods,
+  Json,
+  Schema,
+  Spec,
+  Validator
+} from 'types';
 
 describe('SpecLoader', () => {
   let specLoader: SpecLoader;
